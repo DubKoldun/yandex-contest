@@ -2,6 +2,9 @@
 #include <vector>
 #include <iostream>
 #include "opencv2/opencv.hpp"
+#include <opencv2/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui.hpp>
 #include </nix/store/0a65109gxqip2y851pms8drk6339y6i8-tesseract-4.1.1/include/tesseract/baseapi.h>
 #include </nix/store/pfd5bv39smag5izp4apf1cnb4scxdah4-leptonica-1.79.0/include/leptonica/allheaders.h>
 
@@ -24,11 +27,11 @@ const size_t PIC_PX = 100;
 //     }
 // }
 
-void paint (Mat const& pic, string s) {
+void paint (Mat pic, string s) {
     regex rx("[:aplha:]*");
     if (regex_search(s.begin(), s.end(), rx)) {
-        
-        imshow("black", pic);
+        rectangle(pic, Point(0,0), Point(80, 80), Scalar(0,0,0),-1);
+        imwrite("starry_night.png", pic);
     }
 }
 
@@ -48,23 +51,18 @@ int main() {
     // open image using OpenCV
     Mat im = imread(imPath, IMREAD_COLOR);
 
-    // separate img data to blocks and set blocks data
+    // // separate im data to blocks and set blocks data
     // for (size_t i = 0; i < AM_BLOCKS * PIC_PX; i += PIC_PX) {
     //     for (size_t j = 0; j < AM_BLOCKS * PIC_PX; j += PIC_PX) {
-    //         Rect block(j + 1, i + 1, PIC_PX - 1, PIC_PX - 1); // delete borders for more efficient ocr
+    //         Rect block(j, i, PIC_PX, PIC_PX);
     //         ocr->SetImage(im(block).data, im(block).cols, im(block).rows, 3, im(block).step);
     //         outText.push_back(string(ocr->GetUTF8Text()));
     //     }
     // }
 
-    Rect r(1, 1, PIC_PX - 2, PIC_PX - 2);
-    cv::Mat cropped;
-    cv::getRectSubPix(im, im.size, im.center, cropped);
-        // Set image data
-    ocr->SetImage(cropped.data, cropped.cols, cropped.rows, 3, cropped.step);
-    cout << string(ocr->GetUTF8Text());
-
-
+    Rect block(1, 1, PIC_PX-3, PIC_PX-3);
+    ocr->SetImage(im(block).data, im(block).cols, im(block).rows, 3, im(block).step);
+    outText.push_back(string(ocr->GetUTF8Text()));
     for (auto const& box: outText) {
         // if (i.empty()) return 0;
         cout << box << "\n";
@@ -72,7 +70,7 @@ int main() {
 
     // paint our pic
     Mat buff = im.clone();
-    // // painting(buff, outText);
+    // painting(buff, outText);
     paint (buff, string(ocr->GetUTF8Text()));
 
     ocr->End();
