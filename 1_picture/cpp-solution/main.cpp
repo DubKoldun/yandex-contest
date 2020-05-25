@@ -27,17 +27,25 @@ const size_t PIC_PX = 100;
 //     }
 // }
 
-void paint (Mat pic, string s) {
+enum Color {
+    black,
+    white = 255
+};
+
+void paint (Mat & pic, Color color, size_t i, size_t j) {
+    rectangle(pic, Point(i,j), Point(i + PIC_PX, j + PIC_PX), Scalar(color), -1);
+}
+
+bool checkRegex (string s) {
     regex rx("[:aplha:]*");
     if (regex_search(s.begin(), s.end(), rx)) {
-        rectangle(pic, Point(0,0), Point(80, 80), Scalar(0,0,0),-1);
-        imwrite("starry_night.png", pic);
+        return true;
     }
 }
 
 int main() {
     vector<string> outText;
-    string imPath = "/home/vutaliy/Documents/task1/Untitled7.png";
+    string imPath = "/home/vutaliy/Documents/task1/blandwh.png";
 
     // tesseract object
     tesseract::TessBaseAPI *ocr = new tesseract::TessBaseAPI();
@@ -51,27 +59,31 @@ int main() {
     // open image using OpenCV
     Mat im = imread(imPath, IMREAD_COLOR);
 
-    // // separate im data to blocks and set blocks data
-    // for (size_t i = 0; i < AM_BLOCKS * PIC_PX; i += PIC_PX) {
-    //     for (size_t j = 0; j < AM_BLOCKS * PIC_PX; j += PIC_PX) {
-    //         Rect block(j, i, PIC_PX, PIC_PX);
-    //         ocr->SetImage(im(block).data, im(block).cols, im(block).rows, 3, im(block).step);
-    //         outText.push_back(string(ocr->GetUTF8Text()));
-    //     }
-    // }
+    // separate im data to blocks and set blocks data
+    for (size_t i = 0; i < AM_BLOCKS * PIC_PX; i += PIC_PX) {
+        for (size_t j = 0; j < AM_BLOCKS * PIC_PX; j += PIC_PX) {
 
-    Rect block(1, 1, PIC_PX-3, PIC_PX-3);
-    ocr->SetImage(im(block).data, im(block).cols, im(block).rows, 3, im(block).step);
-    outText.push_back(string(ocr->GetUTF8Text()));
-    for (auto const& box: outText) {
-        // if (i.empty()) return 0;
-        cout << box << "\n";
+            Rect block(j + 1, i + 1, PIC_PX - 1, PIC_PX - 1); // delete borders for more efficient ocr
+            ocr->SetImage(im(block).data, im(block).cols, im(block).rows, 3, im(block).step);
+            outText.push_back(string(ocr->GetUTF8Text()));
+
+            // paint new pic by checking regex
+            if (checkRegex( string(ocr->GetUTF8Text()))) {
+                paint(im, black, j, i);
+            } else {
+                paint(im, white, j, i);
+            }
+        }
     }
 
-    // paint our pic
-    Mat buff = im.clone();
-    // painting(buff, outText);
-    paint (buff, string(ocr->GetUTF8Text()));
+    // show and save pic
+    imshow("starry_night.png", im);
+    imwrite("starry_night.png", im);
+
+    // print text from pic
+    for (auto const& box: outText) {
+        cout << box << "\n";
+    }
 
     ocr->End();
     return 0;
