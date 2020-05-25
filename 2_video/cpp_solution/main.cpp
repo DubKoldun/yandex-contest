@@ -1,10 +1,8 @@
 #include <regex>
 #include <vector>
 #include <iostream>
+#include <algorithm>
 #include "opencv2/opencv.hpp"
-#include <opencv2/core.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/highgui.hpp>
 #include </nix/store/0a65109gxqip2y851pms8drk6339y6i8-tesseract-4.1.1/include/tesseract/baseapi.h>
 #include </nix/store/pfd5bv39smag5izp4apf1cnb4scxdah4-leptonica-1.79.0/include/leptonica/allheaders.h>
 
@@ -13,40 +11,68 @@ using namespace std;
 using namespace cv;
 
 int main(){
+    vector<string> chars;
+    // Create a VideoCapture object and open the input file
+    // If the input is the web camera, pass 0 instead of the video file name
+    VideoCapture cap("/home/vutaliy/Downloads/cut.mp4");
 
-  // Create a VideoCapture object and open the input file
-  // If the input is the web camera, pass 0 instead of the video file name
-  VideoCapture cap("/home/vutaliy/Downloads/task.mp4");
+    // Check if camera opened successfully
+    if(!cap.isOpened()) {
+        cout << "Error opening video stream or file" << endl;
+        return -1;
+    }
 
-  // Check if camera opened successfully
-  // if(!cap.isOpened()){
-  //   cout << "Error opening video stream or file" << endl;
-  //   return -1;
-  // }
+    // tesseract object
+    tesseract::TessBaseAPI *ocr = new tesseract::TessBaseAPI();
 
-  int i = 0;
+    // initialize tesseract to use English (eng) and the LSTM OCR engine.
+    ocr->Init(NULL, "eng", tesseract::OEM_LSTM_ONLY);
 
-  while(1){
+    // set page segmentation mode to PSM_CHAR
+    ocr->SetPageSegMode(tesseract::PSM_SINGLE_CHAR);
 
-    Mat frame;
-    // Capture frame-by-frame
-    cap >> frame;
+    // capture frame-by-frame
+    int i = 0;
+    while(true) {
 
-    // If the frame is empty, break immediately
-    if (frame.empty())
-      break;
+        Mat img;
+        cap >> img;
+        Mat frame;
+        cvtColor(img, frame, COLOR_BGR2GRAY);
 
-    // Display the resulting frame
-    imwrite( "Frame" + i, frame );
 
-    ++i;
-  }
+        // if the frame is empty, break immediately
+        if (frame.empty())
+            break;
 
-  // When everything done, release the video capture object
-  cap.release();
+        ocr->SetImage(frame.data, frame.cols, frame.rows, 3, frame.step);
+        string currentChar = string(ocr->GetUTF8Text());
 
-  // Closes all the frames
-  destroyAllWindows();
+        // skipping same frames
+        if (i > 0 && currentChar == chars[i-1]) {
+            continue;
+        }
+        chars.push_back(currentChar);
+        ++i;
 
-  return 0;
+        // display the resulting frame
+        imshow("Frame", frame);
+
+        // press  ESC on keyboard to exit
+        char c=(char)waitKey(25);
+        if(c==27)
+            break;
+    }
+
+    for (auto const& i: chars) {
+        cout << i;
+    }
+
+    // when everything done, release the video capture object
+    cap.release();
+
+    // closes all the frames
+    destroyAllWindows();
+
+      return 0;
 }
