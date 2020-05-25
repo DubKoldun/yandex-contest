@@ -1,3 +1,4 @@
+#include <map>
 #include <regex>
 #include <vector>
 #include <iostream>
@@ -35,17 +36,24 @@ int main(){
     int i = 0;
     while(true) {
 
+        // get frame and grayscale
         Mat img;
         cap >> img;
         Mat frame;
         cvtColor(img, frame, COLOR_BGR2GRAY);
+
+        // invert colors if need
+        Scalar colour = frame.at<uchar>(Point(0, 0));
+        if(colour.val[0] < 130) {
+            frame = ~frame;
+        }
 
 
         // if the frame is empty, break immediately
         if (frame.empty())
             break;
 
-        ocr->SetImage(frame.data, frame.cols, frame.rows, 3, frame.step);
+        ocr->SetImage(frame.data, frame.cols, frame.rows, 1, frame.step);
         string currentChar = string(ocr->GetUTF8Text());
 
         // skipping same frames
@@ -64,9 +72,21 @@ int main(){
             break;
     }
 
-    for (auto const& i: chars) {
-        cout << i;
+    // sort(chars.begin(), chars.end());
+    // vector<int> alpha(27);
+    map<char, int> alpha;
+    for (size_t i = 0; i < chars.size(); ++i) {
+        // cout << chars[i][0];
+        ++alpha[chars[i][0]];
     }
+
+    string ans = "";
+    for (auto const& i: alpha) {
+            if (i.first == 0) continue;
+            ans += i.first + to_string(i.second);
+    }
+    // reverse(ans.begin(), ans.end());
+    cout << ans;
 
     // when everything done, release the video capture object
     cap.release();
