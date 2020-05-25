@@ -28,20 +28,41 @@ void paint (Mat & pic, Color color, size_t i, size_t j) {
 }
 
 bool checkRegex (string s) {
+    // for black
     regex rx("(lack)");
     regex rx1("(ark)");
     regex rx2("(ot)");
-    // regex rx3("\\(\\d,\\d,\\d\\)");
+    regex rx3("\\(\\d,\\d,\\d\\)[^[:print:]]");
+
+    //for white
+    regex rx4("(.)(.)(.)(.)(.)[^[:print:]]*");
+    regex rx5("(hite)");
+    regex rx6("\\(\\d\\d\\d(.)*[^[:print:]]*\\d\\d\\d(.)*[^[:print:]]*\\d\\d\\d\\)(.)*[^[:print:]]*");
+
+    if (regex_search(s.begin(), s.end(), rx)
+    || regex_search(s.begin(), s.end(), rx1)
+    || regex_search(s.begin(), s.end(), rx2)
+    || regex_match(s.begin(), s.end(), rx3)) {
+        return true;
+    }
+
+    if (regex_match(s.begin(), s.end(), rx4)
+    || regex_search(s.begin(), s.end(), rx5)
+    || regex_search(s.begin(), s.end(), rx6)) {
+        return false;
+    }
     // regex rx3("(\\()?(.)*\\)");
     // regex rx3("[^[:print:]]*(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?[^[:print:]]*");
 
     // regex rx3("(2.2.9)"); //(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?
-    regex rx4("[:s:]*");
+    // regex rx4("[:s:]*");
+    return true;
 
-    return regex_search(s.begin(), s.end(), rx)
-    || regex_search(s.begin(), s.end(), rx1)
-    || regex_search(s.begin(), s.end(), rx2)
-    || s.empty();
+    // return regex_search(s.begin(), s.end(), rx)
+    // || regex_search(s.begin(), s.end(), rx1)
+    // || regex_search(s.begin(), s.end(), rx2)
+    // || regex_search(s.begin(), s.end(), rx3)
+    // || s.empty();
 }
 
 int main() {
