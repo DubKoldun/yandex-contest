@@ -1,6 +1,6 @@
 with import <nixpkgs> {};
 let
-  opencvGtk = opencv.override (old : { enableGtk2 = true; });
+  opencvGtk = opencv.override (old : { enableGtk2 = true; enableFfmpeg = true; });
 in
 stdenv.mkDerivation {
     name = "ocr";
