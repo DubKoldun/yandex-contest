@@ -51,18 +51,7 @@ bool checkRegex (string s) {
     || regex_search(s.begin(), s.end(), rx6)) {
         return false;
     }
-    // regex rx3("(\\()?(.)*\\)");
-    // regex rx3("[^[:print:]]*(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?[^[:print:]]*");
-
-    // regex rx3("(2.2.9)"); //(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?
-    // regex rx4("[:s:]*");
     return true;
-
-    // return regex_search(s.begin(), s.end(), rx)
-    // || regex_search(s.begin(), s.end(), rx1)
-    // || regex_search(s.begin(), s.end(), rx2)
-    // || regex_search(s.begin(), s.end(), rx3)
-    // || s.empty();
 }
 
 int main() {
@@ -101,17 +90,12 @@ int main() {
         }
     }
 
-    // show and save pic
-    // imshow("starry_night.png", im);
-    // waitKey(0);
     imwrite("starry_night.png", im);
 
     // print text from pic
     for (auto const& box: outText) {
         cout << box << "\n";
     }
-    cout << outText[0];
-
 
     ocr->End();
     return 0;
