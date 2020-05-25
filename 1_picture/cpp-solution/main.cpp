@@ -17,15 +17,6 @@ using std::string;
 const size_t AM_BLOCKS = 37;
 const size_t PIC_PX = 100;
 
-// void painting(Mat const& pic, vector<string> const& blocks) {
-//     for (auto const& block: blocks) {
-//         std::tr1::regex rx("*", std::tr1::regex_constants::icase);
-//         if (regex_search(box.begin(), box.end(), rx)) {
-//
-//         }
-//
-//     }
-// }
 
 enum Color {
     black,
@@ -33,14 +24,24 @@ enum Color {
 };
 
 void paint (Mat & pic, Color color, size_t i, size_t j) {
-    rectangle(pic, Point(i,j), Point(i + PIC_PX, j + PIC_PX), Scalar(color), -1);
+    rectangle(pic, Point(i,j), Point(i + PIC_PX, j + PIC_PX), Scalar(color,color,color), -1);
 }
 
 bool checkRegex (string s) {
-    regex rx("[:aplha:]*");
-    if (regex_search(s.begin(), s.end(), rx)) {
-        return true;
-    }
+    regex rx("(lack)");
+    regex rx1("(ark)");
+    regex rx2("(ot)");
+    // regex rx3("\\(\\d,\\d,\\d\\)");
+    // regex rx3("(\\()?(.)*\\)");
+    // regex rx3("[^[:print:]]*(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?[^[:print:]]*");
+
+    // regex rx3("(2.2.9)"); //(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?[:s:]?(.)?
+    regex rx4("[:s:]*");
+
+    return regex_search(s.begin(), s.end(), rx)
+    || regex_search(s.begin(), s.end(), rx1)
+    || regex_search(s.begin(), s.end(), rx2)
+    || s.empty();
 }
 
 int main() {
@@ -53,11 +54,11 @@ int main() {
     // initialize tesseract to use English (eng) and the LSTM OCR engine.
     ocr->Init(NULL, "eng", tesseract::OEM_LSTM_ONLY);
 
-    // set page segmentation mode to PSM_AUTO
-    ocr->SetPageSegMode(tesseract::PSM_AUTO);
+    // set page segmentation mode to PSM_BLOCK. Assume a single uniform block of text.
+    ocr->SetPageSegMode(tesseract::PSM_SINGLE_BLOCK);
 
-    // open image using OpenCV
-    Mat im = imread(imPath, IMREAD_COLOR);
+    // open image using OpenCV without changes
+    Mat im = imread(imPath, -1);
 
     // separate im data to blocks and set blocks data
     for (size_t i = 0; i < AM_BLOCKS * PIC_PX; i += PIC_PX) {
@@ -65,10 +66,13 @@ int main() {
 
             Rect block(j + 1, i + 1, PIC_PX - 1, PIC_PX - 1); // delete borders for more efficient ocr
             ocr->SetImage(im(block).data, im(block).cols, im(block).rows, 3, im(block).step);
-            outText.push_back(string(ocr->GetUTF8Text()));
+
+            string text = (string(ocr->GetUTF8Text()));
+
+            outText.push_back(text);
 
             // paint new pic by checking regex
-            if (checkRegex( string(ocr->GetUTF8Text()))) {
+            if (checkRegex(text)) {
                 paint(im, black, j, i);
             } else {
                 paint(im, white, j, i);
@@ -77,13 +81,16 @@ int main() {
     }
 
     // show and save pic
-    imshow("starry_night.png", im);
+    // imshow("starry_night.png", im);
+    // waitKey(0);
     imwrite("starry_night.png", im);
 
     // print text from pic
     for (auto const& box: outText) {
         cout << box << "\n";
     }
+    cout << outText[0];
+
 
     ocr->End();
     return 0;
