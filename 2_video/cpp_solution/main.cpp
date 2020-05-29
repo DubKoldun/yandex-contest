@@ -12,7 +12,9 @@ using namespace std;
 using namespace cv;
 
 int main(){
+    // vector for saving characters
     vector<string> chars;
+
     // Create a VideoCapture object and open the input file
     // If the input is the web camera, pass 0 instead of the video file name
     VideoCapture cap("/home/vutaliy/Downloads/cut.mp4");
@@ -36,23 +38,34 @@ int main(){
     int i = 0;
     while(true) {
 
-        // get frame and grayscale
-        Mat img;
-        cap >> img;
+        // get frame
         Mat frame;
-        cvtColor(img, frame, COLOR_BGR2GRAY);
-
-        // invert colors if need
-        Scalar colour = frame.at<uchar>(Point(0, 0));
-        if(colour.val[0] < 130) {
-            frame = ~frame;
-        }
-
+        cap >> frame;
 
         // if the frame is empty, break immediately
         if (frame.empty())
             break;
 
+        // parseSetAlpha(frame);
+
+        // grayscale
+        cvtColor(frame, frame, COLOR_BGR2GRAY);
+
+        // invert colors if need
+        Scalar colour = frame.at<uchar>(Point(0, 0));
+        Scalar colour1 = frame.at<uchar>(Point(frame.cols, 0));
+        if((colour.val[0] < 130 && colour1.val[0] < 130)) {
+            frame = ~frame;
+        }
+
+        // saturate all characters
+        for (size_t i = 0; i < frame.cols; ++i) {
+            for (size_t j = 0; j < frame.rows; ++j) {
+                if (frame.at<uchar>(i,j) < 210) frame.at<uchar>(i,j) = 0; // 250 for print saturated 'Y', but bad for the rest parse.
+            }
+        }
+
+        // ocr set image and convert to text
         ocr->SetImage(frame.data, frame.cols, frame.rows, 1, frame.step);
         string currentChar = string(ocr->GetUTF8Text());
 
@@ -72,20 +85,30 @@ int main(){
             break;
     }
 
-    // sort(chars.begin(), chars.end());
-    // vector<int> alpha(27);
+    // map all characters
     map<char, int> alpha;
     for (size_t i = 0; i < chars.size(); ++i) {
-        // cout << chars[i][0];
+        if (chars[i][0] == '0') {
+            ++alpha['O'];
+            continue;
+        }
+        if (chars[i][0] == '1') {
+            ++alpha['I'];
+            continue;
+        }
+        if (chars[i][0] == '\\') {
+            ++alpha['X'];
+            continue;
+        }
         ++alpha[chars[i][0]];
     }
 
+    //print ans
     string ans = "";
     for (auto const& i: alpha) {
             if (i.first == 0) continue;
             ans += i.first + to_string(i.second);
     }
-    // reverse(ans.begin(), ans.end());
     cout << ans;
 
     // when everything done, release the video capture object
