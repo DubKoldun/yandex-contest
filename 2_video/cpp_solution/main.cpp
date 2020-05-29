@@ -11,6 +11,37 @@
 using namespace std;
 using namespace cv;
 
+// check on color characters
+string parseColorSet (Mat const& img) {
+
+    for (size_t x = 0; x < img.rows; ++x) {
+        for (size_t y = 0; y < img.cols; ++y) {
+            Vec3b intensity = img.at<Vec3b>(y, x);
+            uchar blue = intensity.val[0];
+            uchar green = intensity.val[1];
+            uchar red = intensity.val[2];
+
+            if (blue == 255 && red == 0 && green == 0) {
+                return "U";
+            }
+
+            if (green == 255 && red == 0 && blue == 0) {
+                return "G";
+            }
+
+            if (red == 255 && blue == 0) {
+                if (green == 255) {
+                    return "Y";
+                } else if (green == 0) {
+                    return "R";
+                }
+            }
+
+        }
+    }
+    return "Q";
+}
+
 int main(){
     // vector for saving characters
     vector<string> chars;
@@ -46,28 +77,34 @@ int main(){
         if (frame.empty())
             break;
 
-        // parseSetAlpha(frame);
+        // parse by start color
+        string currentChar = parseColorSet(frame);
 
-        // grayscale
-        cvtColor(frame, frame, COLOR_BGR2GRAY);
+        // if not color
+        if (currentChar == "Q") {
 
-        // invert colors if need
-        Scalar colour = frame.at<uchar>(Point(0, 0));
-        Scalar colour1 = frame.at<uchar>(Point(frame.cols, 0));
-        if((colour.val[0] < 130 && colour1.val[0] < 130)) {
-            frame = ~frame;
-        }
+            // grayscale
+            cvtColor(frame, frame, COLOR_BGR2GRAY);
 
-        // saturate all characters
-        for (size_t i = 0; i < frame.cols; ++i) {
-            for (size_t j = 0; j < frame.rows; ++j) {
-                if (frame.at<uchar>(i,j) < 210) frame.at<uchar>(i,j) = 0; // 250 for print saturated 'Y', but bad for the rest parse.
+            // invert colors if need
+            Scalar colour = frame.at<uchar>(Point(0, 0));
+            Scalar colour1 = frame.at<uchar>(Point(frame.cols, 0));
+            if((colour.val[0] < 130 && colour1.val[0] < 130)) {
+                frame = ~frame;
             }
-        }
 
-        // ocr set image and convert to text
-        ocr->SetImage(frame.data, frame.cols, frame.rows, 1, frame.step);
-        string currentChar = string(ocr->GetUTF8Text());
+            // saturate all characters
+            for (size_t i = 0; i < frame.cols; ++i) {
+                for (size_t j = 0; j < frame.rows; ++j) {
+                    if (frame.at<uchar>(i,j) < 210) frame.at<uchar>(i,j) = 0; // 250 for print saturated 'Y', but bad for the rest parse.
+                }
+            }
+
+            // ocr set image and convert to text
+            ocr->SetImage(frame.data, frame.cols, frame.rows, 1, frame.step);
+            currentChar = string(ocr->GetUTF8Text());
+
+        }
 
         // skipping same frames
         if (i > 0 && currentChar == chars[i-1]) {
