@@ -11,6 +11,26 @@
 using namespace std;
 using namespace cv;
 
+// saturate all characters
+void saturate (Mat & frame) {
+    for (size_t i = 0; i < frame.cols; ++i) {
+        for (size_t j = 0; j < frame.rows; ++j) {
+            if (frame.at<uchar>(i,j) < 210) frame.at<uchar>(i,j) = 0; // 250 for print saturated 'Y', but bad for the rest parse.
+        }
+    }
+}
+
+// invert
+void invert (Mat & frame) {
+    frame = ~frame;
+}
+
+// ocr set image and convert to text
+string convertToText(Mat const& img, tesseract::TessBaseAPI *ocr) {
+    ocr->SetImage(img.data, img.cols, img.rows, 1, img.step);
+    return string(ocr->GetUTF8Text());
+}
+
 // check on color characters
 string parseColorSet (Mat const& img) {
 
@@ -40,6 +60,48 @@ string parseColorSet (Mat const& img) {
         }
     }
     return "Q";
+}
+
+// after check on black backgrounds
+string parseBlackSet (Mat const& img, tesseract::TessBaseAPI *ocr) {
+    switch (convertToText(img, ocr)[0]) {
+        case ('A'): {
+            return "A";
+        }
+        case ('C'): {
+            return "O";
+        }
+        case ('o'): {
+            return "O";
+        }
+        case ('0'): {
+            return "O";
+        }
+        case ('O'): {
+            return "O";
+        }
+        case ('1'): {
+            return "I";
+        }
+        case ('I'): {
+            return "I";
+        }
+        case ('V'): {
+            return "V";
+        }
+        case ('8'): {
+            return "B";
+        }
+        case ('W'): {
+            return "W";
+        }
+        case ('w'): {
+            return "W";
+        }
+        default: {
+            return "B";
+        }
+    }
 }
 
 int main(){
@@ -77,7 +139,7 @@ int main(){
         if (frame.empty())
             break;
 
-        // parse by start color
+        // parse by character start color
         string currentChar = parseColorSet(frame);
 
         // if not color
@@ -86,23 +148,22 @@ int main(){
             // grayscale
             cvtColor(frame, frame, COLOR_BGR2GRAY);
 
-            // invert colors if need
+            // parse by black/white background
             Scalar colour = frame.at<uchar>(Point(0, 0));
             Scalar colour1 = frame.at<uchar>(Point(frame.cols, 0));
             if((colour.val[0] < 130 && colour1.val[0] < 130)) {
-                frame = ~frame;
-            }
-
-            // saturate all characters
-            for (size_t i = 0; i < frame.cols; ++i) {
-                for (size_t j = 0; j < frame.rows; ++j) {
-                    if (frame.at<uchar>(i,j) < 210) frame.at<uchar>(i,j) = 0; // 250 for print saturated 'Y', but bad for the rest parse.
+                invert(frame);
+                // saturate(frame);
+                currentChar = parseBlackSet(frame, ocr);
+            } else {
+                currentChar = convertToText(frame, ocr);
+                switch (currentChar[0]) {
+                    case 'T': break;
+                    case 'M': break;
+                    case 'D': break;
+                    default: currentChar = "X";
                 }
             }
-
-            // ocr set image and convert to text
-            ocr->SetImage(frame.data, frame.cols, frame.rows, 1, frame.step);
-            currentChar = string(ocr->GetUTF8Text());
 
         }
 
