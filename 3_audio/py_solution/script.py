@@ -69,7 +69,7 @@ morseInternational = {
 # Split on loud parts
 chunks = split_on_silence(sound,
     # Must be silent for at least 0.2 of a second
-    min_silence_len=250,
+    min_silence_len=500,
 
     # Consider it silent if quieter than -40 dBFS
     silence_thresh=-45
@@ -79,7 +79,7 @@ ans = ""
 
 for i, chunk in enumerate(chunks):
     # Export
-    # chunk.export("/home/vutaliy/prod/yandex_contest/3_audio/py_solution/buff/chunk{0}.wav".format(i), format="wav")
+    chunk.export("/home/vutaliy/prod/yandex_contest/3_audio/py_solution/buff/chunk{0}.wav".format(i), format="wav")
     
     # Get file duration in seconds
     y, sr = librosa.core.load("/home/vutaliy/prod/yandex_contest/3_audio/py_solution/buff/chunk{0}.wav".format(i))
