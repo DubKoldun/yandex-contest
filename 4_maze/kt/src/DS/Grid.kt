@@ -57,13 +57,20 @@ class Maze(val size: Int) {
 
     private fun randomByDfs() : Maze {
         var stack : MutableList<Cell> = MutableList(1) { grid[0][0] }
+        grid[0][0].isVisited = true;
+
         
         while (stack.isNotEmpty()) {
             val currentCell : Cell  = stack.get(stack.size-1) 
             stack.remove(currentCell)
-            currentCell.isVisited = true
 
-            // for ()
+            for (neighbor in currentCell.neighbors) {
+                if (!neighbor.isVisited) {
+                    stack.add(neighbor)
+                    currentCell.walls[neighbor] = Wall.BREAK
+                    neighbor.isVisited = true
+                }
+            }
         }
 
         return this
