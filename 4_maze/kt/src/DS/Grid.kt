@@ -68,6 +68,7 @@ class Maze(val size: Int) {
                 if (!neighbor.isVisited) {
                     stack.add(neighbor)
                     currentCell.walls[neighbor] = Wall.BREAK
+                    neighbor.walls[currentCell] = Wall.BREAK
                     neighbor.isVisited = true
                 }
             }
