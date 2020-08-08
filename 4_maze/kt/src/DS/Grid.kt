@@ -1,5 +1,7 @@
 package DS
 
+import kotlin.random.Random
+
 class Maze(val size: Int) {
     private var grid : MutableList<MutableList<Cell>> 
     private val MAZE_SIZE : Int
@@ -46,6 +48,14 @@ class Maze(val size: Int) {
         }
     }
 
+    private fun shuffle() {
+        for (row in grid) {
+            for (cell in row) {
+                cell.neighbors.shuffle()
+            }
+        }
+    }
+
     private fun defaultMaze() : Maze {
        for (row in grid) {
            for (item in row) {
@@ -56,13 +66,17 @@ class Maze(val size: Int) {
     }
 
     private fun randomByDfs() : Maze {
-        var stack : MutableList<Cell> = MutableList(1) { grid[0][0] }
-        grid[0][0].isVisited = true;
+        shuffle()
 
-        
+        val initialCell = grid[Random.nextInt(0, grid.size-1)][Random.nextInt(0, grid.size-1)]
+        // val initialCell = grid[0][0]
+        var stack : MutableList<Cell> = MutableList(1) { initialCell }
+        initialCell.isVisited = true;
+
         while (stack.isNotEmpty()) {
             val currentCell : Cell  = stack.get(stack.size-1) 
             stack.remove(currentCell)
+            // currentCell.neighbors.shuffle()
 
             for (neighbor in currentCell.neighbors) {
                 if (!neighbor.isVisited) {
@@ -97,7 +111,7 @@ class Maze(val size: Int) {
         for (i in 1..MAZE_SIZE-2) {
 
             // left border
-            ans += if (i % 2 == 0)  '+' else '|'
+            ans += if (i % 2 == 0) '+' else '|'
 
             // generate plot by entries
             for (j in 1..MAZE_SIZE-2) {
@@ -105,7 +119,7 @@ class Maze(val size: Int) {
                 val cell_j: Int = (j-1)/2
                 val cell = grid[cell_i][cell_j]
             
-                if (i % 2 == 0) 
+                if (i % 2 == 0)  // check this pls
                     ans += if (j % 2 == 0) '+' else 
                         when (cell.walls[grid[cell_i+1][cell_j]]) {
                             Wall.BREAK -> '.'
