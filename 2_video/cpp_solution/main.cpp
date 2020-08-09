@@ -4,8 +4,8 @@
 #include <iostream>
 #include <algorithm>
 #include "opencv2/opencv.hpp"
-#include </nix/store/0a65109gxqip2y851pms8drk6339y6i8-tesseract-4.1.1/include/tesseract/baseapi.h>
-#include </nix/store/pfd5bv39smag5izp4apf1cnb4scxdah4-leptonica-1.79.0/include/leptonica/allheaders.h>
+#include <path_to_tesseract/include/tesseract/baseapi.h>
+#include <path_to_leptonica/include/leptonica/allheaders.h>
 
 
 using namespace std;
@@ -108,11 +108,10 @@ int main(){
     // vector for saving characters
     vector<string> chars;
 
-    // Create a VideoCapture object and open the input file
-    // If the input is the web camera, pass 0 instead of the video file name
-    VideoCapture cap("/home/vutaliy/Downloads/cut.mp4");
+    // open video file
+    VideoCapture cap("path_to_file/file.mp4");
 
-    // Check if camera opened successfully
+    // check if file opened successfully
     if(!cap.isOpened()) {
         cout << "Error opening video stream or file" << endl;
         return -1;
@@ -201,7 +200,7 @@ int main(){
         ++alpha[chars[i][0]];
     }
 
-    //print ans
+    // print ans
     string ans = "";
     for (auto const& i: alpha) {
             if (i.first == 0) continue;
@@ -214,6 +213,5 @@ int main(){
 
     // closes all the frames
     destroyAllWindows();
-
-      return 0;
+    return 0;
 }
