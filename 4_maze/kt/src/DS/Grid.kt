@@ -69,14 +69,12 @@ class Maze(val size: Int) {
         shuffle()
 
         val initialCell = grid[Random.nextInt(0, grid.size-1)][Random.nextInt(0, grid.size-1)]
-        // val initialCell = grid[0][0]
         var stack : MutableList<Cell> = MutableList(1) { initialCell }
         initialCell.isVisited = true;
 
         while (stack.isNotEmpty()) {
             val currentCell : Cell  = stack.get(stack.size-1) 
             stack.remove(currentCell)
-            // currentCell.neighbors.shuffle()
 
             for (neighbor in currentCell.neighbors) {
                 if (!neighbor.isVisited) {
