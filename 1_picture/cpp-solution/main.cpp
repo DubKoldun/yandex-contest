@@ -5,8 +5,8 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
-#include </nix/store/0a65109gxqip2y851pms8drk6339y6i8-tesseract-4.1.1/include/tesseract/baseapi.h>
-#include </nix/store/pfd5bv39smag5izp4apf1cnb4scxdah4-leptonica-1.79.0/include/leptonica/allheaders.h>
+#include <path_to_tesseract/include/tesseract/baseapi.h>
+#include <path_to_leptonica/include/leptonica/allheaders.h>
 
 using namespace cv;
 using std::cout;
@@ -56,7 +56,7 @@ bool checkRegex (string s) {
 
 int main() {
     vector<string> outText;
-    string imPath = "/home/vutaliy/Documents/task1/blandwh.png";
+    string imPath = "path_to_file/file.png";
 
     // tesseract object
     tesseract::TessBaseAPI *ocr = new tesseract::TessBaseAPI();
@@ -90,7 +90,7 @@ int main() {
         }
     }
 
-    imwrite("starry_night.png", im);
+    imwrite("upd_file.png", im);
 
     // print text from pic
     for (auto const& box: outText) {
