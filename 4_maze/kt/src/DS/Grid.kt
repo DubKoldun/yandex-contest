@@ -48,6 +48,7 @@ class Maze(val size: Int) {
         }
     }
 
+    // randomize the neighbors
     private fun shuffle() {
         for (row in grid) {
             for (cell in row) {
@@ -56,6 +57,7 @@ class Maze(val size: Int) {
         }
     }
 
+    // generate maze with 1x1 rooms
     private fun defaultMaze() : Maze {
        for (row in grid) {
            for (item in row) {
@@ -65,13 +67,17 @@ class Maze(val size: Int) {
        return this
     }
 
+    // dfs from random initial cell to random neighbor cell
     private fun randomByDfs() : Maze {
+        // randomize the neighbors
         shuffle()
 
+        // init cell and stack
         val initialCell = grid[Random.nextInt(0, grid.size-1)][Random.nextInt(0, grid.size-1)]
         var stack : MutableList<Cell> = MutableList(1) { initialCell }
         initialCell.isVisited = true;
 
+        // iterative dfs
         while (stack.isNotEmpty()) {
             val currentCell : Cell  = stack.get(stack.size-1) 
             stack.remove(currentCell)
@@ -89,6 +95,7 @@ class Maze(val size: Int) {
         return this
     }
 
+    // start generate the maze
     fun generateMaze(type: Int = 0) : Maze {
         return when (type) {
             1 -> randomByDfs()
@@ -96,20 +103,21 @@ class Maze(val size: Int) {
         }
     }
 
+    // generate string representation 
     fun toStr() : String {
         var ans : String = ""
 
         // generate top border of maze
         for (i in 0..MAZE_SIZE-1) {
-            ans += if (i % 2 == 0) '+' else '-'
+            ans += if (i % 2 == 0) "+" else "-"
         }
-        ans += '\n'
+        ans += "\n"
 
         // main part of a maze
         for (i in 1..MAZE_SIZE-2) {
 
             // left border
-            ans += if (i % 2 == 0) '+' else '|'
+            ans += if (i % 2 == 0) "+" else "|"
 
             // generate plot by entries
             for (j in 1..MAZE_SIZE-2) {
@@ -118,16 +126,16 @@ class Maze(val size: Int) {
                 val cell = grid[cell_i][cell_j]
             
                 if (i % 2 == 0)  // check this pls
-                    ans += if (j % 2 == 0) '+' else 
+                    ans += if (j % 2 == 0) "+" else 
                         when (cell.walls[grid[cell_i+1][cell_j]]) {
-                            Wall.BREAK -> '.'
-                            else -> '-'
+                            Wall.BREAK -> "."
+                            else -> "-"
                         }
                 else 
-                    ans += if (j % 2 == 1) '.' else 
+                    ans += if (j % 2 == 1) "." else 
                         when (cell.walls[grid[cell_i][cell_j+1]]) {
-                            Wall.BREAK -> '.'
-                            else -> '|'
+                            Wall.BREAK -> "."
+                            else -> "|"
                         }           
             }
 
@@ -137,7 +145,7 @@ class Maze(val size: Int) {
         
         // generate bottom border
         for (i in 0..MAZE_SIZE-1) {
-            ans += if (i % 2 == 0)  '+' else '-'
+            ans += if (i % 2 == 0)  "+" else "-"
         }
 
         return ans
