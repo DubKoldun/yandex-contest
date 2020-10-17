@@ -80,16 +80,21 @@ class Maze(val size: Int) {
         // iterative dfs
         while (stack.isNotEmpty()) {
             val currentCell : Cell  = stack.get(stack.size-1) 
-            stack.remove(currentCell)
-
-            for (neighbor in currentCell.neighbors) {
+            if (currentCell.amVisited == currentCell.neighbors.size) {
+                stack.remove(currentCell)
+            } else {
+                var neighbor = currentCell.neighbors[currentCell.amVisited]
                 if (!neighbor.isVisited) {
                     stack.add(neighbor)
+
                     currentCell.walls[neighbor] = Wall.BREAK
                     neighbor.walls[currentCell] = Wall.BREAK
+                    
                     neighbor.isVisited = true
                 }
+                ++currentCell.amVisited
             }
+            
         }
 
         return this

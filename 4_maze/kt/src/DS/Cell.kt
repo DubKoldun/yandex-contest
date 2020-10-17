@@ -8,4 +8,5 @@ class Cell () {
     var neighbors: MutableList<Cell> = mutableListOf<Cell>()
     var walls : MutableMap<Cell, Wall> = mutableMapOf<Cell, Wall>()
     var isVisited : Boolean = false
+    var amVisited : Int = 0
 }
